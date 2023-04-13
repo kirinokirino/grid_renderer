@@ -1,3 +1,4 @@
+#![feature(slice_flatten)]
 #![warn(clippy::nursery, clippy::pedantic)]
 #![allow(clippy::cast_precision_loss)]
 #![windows_subsystem = "windows"]
@@ -15,6 +16,7 @@ use app::App;
 mod config;
 use config::Config;
 
+mod font;
 mod game;
 mod screenshot;
 mod spritesheet;
