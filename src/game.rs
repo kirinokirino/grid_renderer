@@ -9,7 +9,7 @@ use glam::{UVec2, Vec2};
 
 use crate::app::{Keyboard, Mouse};
 use crate::config::Config;
-use crate::font::VGA8;
+use crate::font::vga8;
 use crate::spritesheet::Spritesheet;
 
 pub struct Game {
@@ -40,7 +40,7 @@ impl Game {
                 ImageDataType::RGBA,
                 ImageSmoothingMode::NearestNeighbor,
                 UVec2::new(8, 16 * 256),
-                &to_rgba_bytes(&VGA8),
+                &vga8(),
             )
             .unwrap();
         self.spritesheets
@@ -57,9 +57,8 @@ impl Game {
 
     pub fn draw(&self, graphics: &mut Graphics2D) {
         let vga8 = self.spritesheets.get(0).unwrap();
-        let scale = 1;
-        let width = 8 * scale;
-        let height = 16 * scale;
+        let width = self.config.grid_width;
+        let height = self.config.grid_height;
         let sentence = "1234567890',.ygcrl/=aoeuidhtns-;qjkxbmwvz?:;";
         for (i, char_idx) in sentence.chars().map(|ch| ch as u8).enumerate() {
             let pos = Vec2::new(
@@ -74,28 +73,4 @@ impl Game {
             );
         }
     }
-}
-
-pub fn to_rgba_bytes(vga8: &[[u8; 16]; 256]) -> Vec<u8> {
-    let mut expanded: Vec<u8> = Vec::with_capacity(4 * 8 * 16 * 256);
-    for character in vga8 {
-        for line in character {
-            for i in 0..8 {
-                let mask = 1 << i;
-                let bit_is_set = (mask & line) > 0;
-                if bit_is_set {
-                    expanded.push(255);
-                    expanded.push(255);
-                    expanded.push(255);
-                    expanded.push(255);
-                } else {
-                    expanded.push(0);
-                    expanded.push(0);
-                    expanded.push(0);
-                    expanded.push(0);
-                }
-            }
-        }
-    }
-    expanded
 }

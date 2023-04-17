@@ -1,3 +1,31 @@
+pub fn to_rgba_bytes(vga8: &[[u8; 16]; 256]) -> Vec<u8> {
+    let mut expanded: Vec<u8> = Vec::with_capacity(4 * 8 * 16 * 256);
+    for character in vga8 {
+        for line in character {
+            for i in 0..8 {
+                let mask = 1 << i;
+                let bit_is_set = (mask & line) > 0;
+                if bit_is_set {
+                    expanded.push(255);
+                    expanded.push(255);
+                    expanded.push(255);
+                    expanded.push(255);
+                } else {
+                    expanded.push(0);
+                    expanded.push(0);
+                    expanded.push(0);
+                    expanded.push(0);
+                }
+            }
+        }
+    }
+    expanded
+}
+
+pub fn vga8() -> Vec<u8> {
+    to_rgba_bytes(&VGA8)
+}
+
 #[allow(clippy::unreadable_literal)]
 #[rustfmt::skip]
 pub static VGA8: [[u8; 16]; 256] = [

@@ -10,6 +10,8 @@ pub struct Config {
     pub sleep_ms_per_frame: u64,
     pub window_width: u32,
     pub window_height: u32,
+    pub grid_width: u32,
+    pub grid_height: u32,
 }
 
 impl Config {
@@ -37,6 +39,8 @@ impl Config {
             ("sleep_ms_per_frame", "5"),
             ("window_width", "640"),
             ("window_height", "480"),
+            ("grid_width", "8"),
+            ("grid_height", "16"),
         ]);
         let config_map = fusion(defaults, Some(self.path.clone().unwrap().as_str()));
         let title = config_map.get("title").unwrap().to_string();
@@ -46,12 +50,16 @@ impl Config {
             .parse::<u64>()?;
         let window_width = config_map.get("window_width").unwrap().parse::<u32>()?;
         let window_height = config_map.get("window_height").unwrap().parse::<u32>()?;
+        let grid_width = config_map.get("grid_width").unwrap().parse::<u32>()?;
+        let grid_height = config_map.get("grid_height").unwrap().parse::<u32>()?;
         Ok(Self {
             path: self.path,
             title,
             sleep_ms_per_frame,
             window_height,
             window_width,
+            grid_width,
+            grid_height,
         })
     }
 }
@@ -64,6 +72,8 @@ impl Default for Config {
             sleep_ms_per_frame: 5,
             window_width: 640,
             window_height: 640,
+            grid_width: 8,
+            grid_height: 16,
         }
     }
 }
