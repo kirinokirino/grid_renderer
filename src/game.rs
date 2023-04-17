@@ -55,22 +55,48 @@ impl Game {
         self.counter += 1;
     }
 
-    pub fn draw(&self, graphics: &mut Graphics2D) {
+    pub fn draw_char(
+        &self,
+        ch: char,
+        position: Vec2,
+        color: Color,
+        bg_color: Color,
+        graphics: &mut Graphics2D,
+    ) {
         let vga8 = self.spritesheets.get(0).unwrap();
         let width = self.config.grid_width;
         let height = self.config.grid_height;
-        let sentence = "1234567890',.ygcrl/=aoeuidhtns-;qjkxbmwvz?:;";
-        for (i, char_idx) in sentence.chars().map(|ch| ch as u8).enumerate() {
-            let pos = Vec2::new(
-                (i % 16) as f32 * width as f32,
-                (i / 16) as f32 * height as f32,
-            );
-            vga8.draw_sprite(
-                &Rect::new(pos, pos + Vec2::new(width as f32, height as f32)),
-                0,
-                char_idx.into(),
-                graphics,
-            );
+        let rect = Rect::new(position, position + Vec2::new(width as f32, height as f32));
+        graphics.draw_rectangle(rect.clone(), bg_color);
+        vga8.draw_sprite_with_color(&rect, 0, ch.into(), color, graphics);
+    }
+
+    pub fn draw_string(
+        &self,
+        str: &str,
+        position: Vec2,
+        color: Color,
+        bg_color: Color,
+        graphics: &mut Graphics2D,
+    ) {
+        let vga8 = self.spritesheets.get(0).unwrap();
+        let width = self.config.grid_width;
+        let height = self.config.grid_height;
+        for (i, char_idx) in str.chars().map(|ch| ch as u8).enumerate() {
+            let pos = position + Vec2::new((u32::try_from(i) * width) as f32, 0.0);
+            let rect = Rect::new(pos, pos + Vec2::new(width as f32, height as f32));
+            graphics.draw_rectangle(rect.clone(), bg_color);
+            vga8.draw_sprite_with_color(&rect, 0, char_idx.into(), color, graphics);
         }
+    }
+
+    pub fn draw(&self, graphics: &mut Graphics2D) {
+        self.draw_string(
+            "1234567890',.ygcrl/=aoeuidhtns-;qjkxbmwvz?:;",
+            Vec2::new(16.0, 32.0),
+            Color::RED,
+            Color::BLUE,
+            graphics,
+        );
     }
 }
