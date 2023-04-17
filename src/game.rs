@@ -10,7 +10,7 @@ use glam::{UVec2, Vec2};
 
 use crate::app::{Keyboard, Mouse};
 use crate::config::Config;
-use crate::font::FONT;
+use crate::font::VGA8;
 use crate::spritesheet::Spritesheet;
 
 pub struct Game {
@@ -39,9 +39,9 @@ impl Game {
         let image_handle = graphics
             .create_image_from_raw_pixels(
                 ImageDataType::RGB,
-                ImageSmoothingMode::NearestNeighbor,
-                UVec2::new(8, 8 * 512),
-                FONT.flatten(),
+                ImageSmoothingMode::Linear,
+                UVec2::new(8, 16 * 256),
+                &to_rgb_bytes(&VGA8),
             )
             .unwrap();
         // let image_handle = graphics
@@ -51,7 +51,7 @@ impl Game {
         //         "cozette.png",
         //     )
         //     .unwrap();
-        let spritesheet = Spritesheet::new(image_handle, 1, 512);
+        let spritesheet = Spritesheet::new(image_handle, 1, 256);
         self.spritesheets.push(spritesheet);
     }
 
@@ -64,16 +64,18 @@ impl Game {
     }
 
     pub fn draw(&self, graphics: &mut Graphics2D) {
-        let font = self.spritesheets.get(0).unwrap();
-        let width = 16;
-        let height = 16;
-        for x in 0..font.width {
-            for y in 0..font.height {
+        let vga8 = self.spritesheets.get(0).unwrap();
+        let scale = 1;
+        let padding = 0;
+        let width = 8 * scale;
+        let height = 16 * scale;
+        for x in 0..vga8.width {
+            for y in 0..vga8.height {
                 let pos = Vec2::new(
-                    (y / 20) as f32 * width as f32,
-                    (y % 20) as f32 * height as f32,
+                    (y % 16) as f32 * (width + padding) as f32,
+                    (y / 16) as f32 * (height + padding) as f32,
                 );
-                font.draw_sprite(
+                vga8.draw_sprite(
                     &Rect::new(pos, pos + Vec2::new(width as f32, height as f32)),
                     x,
                     y,
@@ -82,4 +84,29 @@ impl Game {
             }
         }
     }
+}
+
+pub fn to_rgb_bytes(vga8: &[[u8; 16]; 256]) -> Vec<u8> {
+    let mut expanded: Vec<u8> = Vec::with_capacity(3 * 8 * 16 * 256);
+    for character in vga8 {
+        for line in character {
+            for i in 0..8 {
+                let mask = 1 << i;
+                let bit = (mask & line) > 0;
+                match bit {
+                    true => {
+                        expanded.push(255);
+                        expanded.push(255);
+                        expanded.push(255);
+                    }
+                    false => {
+                        expanded.push(0);
+                        expanded.push(0);
+                        expanded.push(0);
+                    }
+                }
+            }
+        }
+    }
+    expanded
 }

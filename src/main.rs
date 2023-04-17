@@ -1,4 +1,3 @@
-#![feature(slice_flatten)]
 #![warn(clippy::nursery, clippy::pedantic)]
 #![allow(clippy::cast_precision_loss)]
 #![windows_subsystem = "windows"]
