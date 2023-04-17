@@ -12,11 +12,45 @@ use crate::config::Config;
 use crate::font::vga8;
 use crate::spritesheet::Spritesheet;
 
+#[derive(Copy, Clone, Debug)]
+struct Tile {
+    ch: char,
+    fg: Color,
+    bg: Color,
+}
+
+impl Tile {
+    pub const fn new(ch: char) -> Self {
+        Self {
+            ch,
+            fg: Color::WHITE,
+            bg: Color::BLACK,
+        }
+    }
+    pub const fn with_fg(self, color: Color) -> Self {
+        Self { fg: color, ..self }
+    }
+    pub const fn with_bg(self, color: Color) -> Self {
+        Self { bg: color, ..self }
+    }
+}
+
+impl Default for Tile {
+    fn default() -> Self {
+        Self {
+            ch: ' ',
+            fg: Color::WHITE,
+            bg: Color::BLACK,
+        }
+    }
+}
+
 pub struct Game {
     config: Config,
     images: Vec<ImageHandle>,
     spritesheets: Vec<Spritesheet>,
     counter: usize,
+    buffer: [[Tile; 80]; 40],
 
     viewport_size: UVec2,
 }
@@ -24,10 +58,12 @@ pub struct Game {
 impl Game {
     pub fn new(config: Config) -> Self {
         let viewport_size = UVec2::new(config.window_width, config.window_height);
+        let buffer = [[Tile::new(' '); 80]; 40];
         Self {
             config,
             images: Vec::new(),
             spritesheets: Vec::new(),
+            buffer,
 
             counter: 0,
             viewport_size,
@@ -53,50 +89,50 @@ impl Game {
 
     pub fn update(&mut self, current_frame: u64) {
         self.counter += 1;
+        self.display_string(
+            "1234567890',.ygcrl/=aoeuidhtns-;qjkxbmwvz?:;",
+            UVec2::new(1, 1),
+            &Color::RED,
+            &Color::BLUE,
+        );
     }
 
-    pub fn draw_char(
+    fn draw_char(
         &self,
-        ch: char,
+        ch: &char,
         position: Vec2,
-        color: Color,
-        bg_color: Color,
+        color: &Color,
+        bg_color: &Color,
         graphics: &mut Graphics2D,
     ) {
         let vga8 = self.spritesheets.get(0).unwrap();
         let width = self.config.grid_width;
         let height = self.config.grid_height;
         let rect = Rect::new(position, position + Vec2::new(width as f32, height as f32));
-        graphics.draw_rectangle(rect.clone(), bg_color);
-        vga8.draw_sprite_with_color(&rect, 0, ch.into(), color, graphics);
+        graphics.draw_rectangle(rect.clone(), *bg_color);
+        vga8.draw_sprite_with_color(&rect, 0, (*ch) as u32, *color, graphics);
     }
 
-    pub fn draw_string(
-        &self,
-        str: &str,
-        position: Vec2,
-        color: Color,
-        bg_color: Color,
-        graphics: &mut Graphics2D,
-    ) {
-        let vga8 = self.spritesheets.get(0).unwrap();
-        let width = self.config.grid_width;
-        let height = self.config.grid_height;
-        for (i, char_idx) in str.chars().map(|ch| ch as u8).enumerate() {
-            let pos = position + Vec2::new((u32::try_from(i) * width) as f32, 0.0);
-            let rect = Rect::new(pos, pos + Vec2::new(width as f32, height as f32));
-            graphics.draw_rectangle(rect.clone(), bg_color);
-            vga8.draw_sprite_with_color(&rect, 0, char_idx.into(), color, graphics);
+    pub fn display_string(&mut self, str: &str, position: UVec2, color: &Color, bg_color: &Color) {
+        let UVec2 { x, y } = position;
+        for (i, ch) in str.chars().enumerate() {
+            let tile = Tile::new(ch).with_bg(*bg_color).with_fg(*color);
+            if x >= 80 || y >= 40 {
+                continue;
+            }
+            self.buffer[y as usize][x as usize + i] = tile;
         }
     }
 
     pub fn draw(&self, graphics: &mut Graphics2D) {
-        self.draw_string(
-            "1234567890',.ygcrl/=aoeuidhtns-;qjkxbmwvz?:;",
-            Vec2::new(16.0, 32.0),
-            Color::RED,
-            Color::BLUE,
-            graphics,
-        );
+        let width = self.config.grid_width;
+        let height = self.config.grid_height;
+        for (y, row) in self.buffer.iter().enumerate() {
+            for (x, tile) in row.iter().enumerate() {
+                let pos = Vec2::new((x * width as usize) as f32, (y * height as usize) as f32);
+                let Tile { ch, fg, bg } = tile;
+                self.draw_char(ch, pos, fg, bg, graphics);
+            }
+        }
     }
 }
