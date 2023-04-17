@@ -99,11 +99,10 @@ pub fn draw_sprite(
             (sprite_y + 1) as f32 / spritesheet_height as f32,
         ),
     ];
-    let vertex_colors = if let Some(color) = color {
-        [color, color, color, color]
-    } else {
-        [Color::WHITE, Color::WHITE, Color::WHITE, Color::WHITE]
-    };
+    let vertex_colors = color.map_or(
+        [Color::WHITE, Color::WHITE, Color::WHITE, Color::WHITE],
+        |color| [color, color, color, color],
+    );
     graphics.draw_quad_image_tinted_four_color(
         vertex_positions_clockwise,
         vertex_colors,

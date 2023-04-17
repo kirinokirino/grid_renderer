@@ -24,7 +24,7 @@ impl Screenshot {
         if self.counter == 0 && CLEAN_FOLDER {
             let path = fs::canonicalize(&self.folder).unwrap();
             dbg!("Clearing screenshots folder: {}", path.display());
-            fs::remove_dir_all(path);
+            let _ = fs::remove_dir_all(path);
         }
         if self.folder_path().is_ok() {
             let raw = graphics.capture(ImageDataType::RGBA);

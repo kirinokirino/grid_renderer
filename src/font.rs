@@ -1,3 +1,4 @@
+#[allow(clippy::unreadable_literal)]
 #[rustfmt::skip]
 pub static VGA8: [[u8; 16]; 256] = [
 

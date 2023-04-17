@@ -1,7 +1,6 @@
 use glam_rect::Rect;
 use speedy2d::color::Color;
 use speedy2d::image::ImageDataType;
-use speedy2d::image::ImageFileFormat;
 use speedy2d::image::ImageHandle;
 use speedy2d::image::ImageSmoothingMode;
 use speedy2d::Graphics2D;
@@ -44,15 +43,8 @@ impl Game {
                 &to_rgba_bytes(&VGA8),
             )
             .unwrap();
-        // let image_handle = graphics
-        //     .create_image_from_file_path(
-        //         Some(ImageFileFormat::PNG),
-        //         ImageSmoothingMode::Linear,
-        //         "cozette.png",
-        //     )
-        //     .unwrap();
-        let spritesheet = Spritesheet::new(image_handle, 1, 256);
-        self.spritesheets.push(spritesheet);
+        self.spritesheets
+            .push(Spritesheet::new(image_handle, 1, 256));
     }
 
     pub fn input(&mut self, viewport_size: UVec2, _mouse: &Mouse, keyboard: &Keyboard) {
@@ -90,20 +82,17 @@ pub fn to_rgba_bytes(vga8: &[[u8; 16]; 256]) -> Vec<u8> {
         for line in character {
             for i in 0..8 {
                 let mask = 1 << i;
-                let bit = (mask & line) > 0;
-                match bit {
-                    true => {
-                        expanded.push(255);
-                        expanded.push(255);
-                        expanded.push(255);
-                        expanded.push(255);
-                    }
-                    false => {
-                        expanded.push(0);
-                        expanded.push(0);
-                        expanded.push(0);
-                        expanded.push(0);
-                    }
+                let bit_is_set = (mask & line) > 0;
+                if bit_is_set {
+                    expanded.push(255);
+                    expanded.push(255);
+                    expanded.push(255);
+                    expanded.push(255);
+                } else {
+                    expanded.push(0);
+                    expanded.push(0);
+                    expanded.push(0);
+                    expanded.push(0);
                 }
             }
         }

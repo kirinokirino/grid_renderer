@@ -18,7 +18,7 @@ impl Config {
             path: Some(path.to_string()),
             ..Default::default()
         };
-        let config = match config.reload() {
+        config = match config.reload() {
             Ok(config) => config,
             Err(err) => {
                 eprintln!("{err}");
