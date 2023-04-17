@@ -25,6 +25,25 @@ impl Spritesheet {
             height,
         }
     }
+    pub fn draw_sprite_with_color(
+        &self,
+        dest: &Rect,
+        sprite_x: u32,
+        sprite_y: u32,
+        color: Color,
+        graphics: &mut Graphics2D,
+    ) {
+        draw_sprite(
+            dest,
+            &self.image_handle,
+            sprite_x,
+            sprite_y,
+            self.width,
+            self.height,
+            Some(color),
+            graphics,
+        );
+    }
 
     pub fn draw_sprite(
         &self,
@@ -40,6 +59,7 @@ impl Spritesheet {
             sprite_y,
             self.width,
             self.height,
+            None,
             graphics,
         );
     }
@@ -52,6 +72,7 @@ pub fn draw_sprite(
     sprite_y: u32,
     spritesheet_width: u32,
     spritesheet_height: u32,
+    color: Option<Color>,
     graphics: &mut Graphics2D,
 ) {
     let vertex_positions_clockwise = [
@@ -78,7 +99,11 @@ pub fn draw_sprite(
             (sprite_y + 1) as f32 / spritesheet_height as f32,
         ),
     ];
-    let vertex_colors = [Color::WHITE, Color::WHITE, Color::WHITE, Color::WHITE];
+    let vertex_colors = if let Some(color) = color {
+        [color, color, color, color]
+    } else {
+        [Color::WHITE, Color::WHITE, Color::WHITE, Color::WHITE]
+    };
     graphics.draw_quad_image_tinted_four_color(
         vertex_positions_clockwise,
         vertex_colors,
