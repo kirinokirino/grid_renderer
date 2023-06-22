@@ -50,14 +50,7 @@ impl Game {
             .unwrap();
         self.spritesheets
             .push(Spritesheet::new(image_handle, 1, 256));
-    }
-
-    pub fn input(&mut self, viewport_size: UVec2, _mouse: &Mouse, keyboard: &Keyboard) {
-        self.viewport_size = viewport_size;
-    }
-
-    pub fn update(&mut self, current_frame: u64) {
-        self.counter += 1;
+            
         for (y, line) in FILE.lines().enumerate() {
             self.display_string(
                 &line
@@ -70,6 +63,14 @@ impl Game {
                 &Color::BLACK,
             );
         }
+    }
+
+    pub fn input(&mut self, viewport_size: UVec2, _mouse: &Mouse, keyboard: &Keyboard) {
+        self.viewport_size = viewport_size;
+    }
+
+    pub fn update(&mut self, current_frame: u64) {
+        self.counter += 1;
     }
 
     fn draw_char(

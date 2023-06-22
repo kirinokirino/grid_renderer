@@ -9,6 +9,8 @@ use speedy2d::{
     Graphics2D,
 };
 
+use std::sync::mpsc::{Receiver, TryRecvError};
+
 use crate::{
     game::Game,
     screenshot::{Format, Screenshot},
@@ -24,13 +26,15 @@ pub struct App {
     is_fullscreen: bool,
     is_inputting_text: bool,
 
+    channel: Receiver<String>,
+
     screenshot: Screenshot,
 
     game: Game,
 }
 
 impl App {
-    pub fn new(viewport_size: UVec2, config: crate::config::Config) -> Self {
+    pub fn new(viewport_size: UVec2, config: crate::config::Config, rx: Receiver<String>) -> Self {
         Self {
             viewport_size,
 
@@ -40,6 +44,8 @@ impl App {
             keyboard: Keyboard::new(),
             is_fullscreen: false,
             is_inputting_text: false,
+
+            channel: rx,
 
             screenshot: Screenshot::new("screenshots".to_string()),
 
@@ -76,6 +82,16 @@ impl App {
     pub fn input(&mut self) {
         self.game
             .input(self.viewport_size, &self.mouse, &self.keyboard);
+
+        let res = self.channel.try_recv();
+        match res {
+            Ok(value) => {
+                self.game
+                    .display_string(&value, UVec2::new(2, 2), &Color::WHITE, &Color::BLUE)
+            }
+            Err(TryRecvError::Disconnected) => panic!("disconnected from stdin!"),
+            Err(TryRecvError::Empty) => (),
+        }
     }
 
     pub fn update(&mut self) {

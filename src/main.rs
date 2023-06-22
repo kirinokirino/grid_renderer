@@ -20,7 +20,23 @@ mod game;
 mod screenshot;
 mod spritesheet;
 
+use std::io::{self, BufRead, BufReader};
+use std::sync::mpsc;
+use std::thread;
+
 fn main() {
+    let (tx, rx) = mpsc::channel::<String>();
+    thread::spawn(move || {
+        tx.send("started loop".to_string()).unwrap();
+        loop {
+            let reader = BufReader::new(io::stdin().lock());
+            for line in reader.lines().filter_map(|line| line.ok()) {
+                let res = tx.send(line);
+                res.unwrap();
+            }
+        }
+    });
+
     let config = Config::new("config.txt");
     let window_size = UVec2::new(config.window_width, config.window_height);
     let window_pixels = WindowSize::PhysicalPixels(window_size);
@@ -31,5 +47,5 @@ fn main() {
             .with_transparent(false),
     )
     .expect("Wasn't able to create a window!");
-    window.run_loop(App::new(window_size, config));
+    window.run_loop(App::new(window_size, config, rx));
 }
