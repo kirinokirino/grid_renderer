@@ -346,6 +346,7 @@ dependencies = [
  "glam",
  "glam_rect",
  "image",
+ "log",
  "speedy2d",
 ]
 
