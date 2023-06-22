@@ -85,10 +85,7 @@ impl App {
 
         let res = self.channel.try_recv();
         match res {
-            Ok(value) => {
-                self.game
-                    .display_string(&value, UVec2::new(2, 2), &Color::WHITE, &Color::BLUE)
-            }
+            Ok(value) => self.game.apply_command(&value),
             Err(TryRecvError::Disconnected) => panic!("disconnected from stdin!"),
             Err(TryRecvError::Empty) => (),
         }

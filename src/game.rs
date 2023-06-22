@@ -50,7 +50,7 @@ impl Game {
             .unwrap();
         self.spritesheets
             .push(Spritesheet::new(image_handle, 1, 256));
-            
+
         for (y, line) in FILE.lines().enumerate() {
             self.display_string(
                 &line
@@ -103,6 +103,11 @@ impl Game {
             }
             self.display_buffer[y as usize][x as usize + i] = tile;
         }
+    }
+
+    pub fn apply_command(&mut self, command: &str) {
+		// implement communication protocol here
+		
     }
 
     pub fn draw(&self, graphics: &mut Graphics2D) {
